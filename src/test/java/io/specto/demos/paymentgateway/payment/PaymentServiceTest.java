@@ -21,8 +21,7 @@ import static org.junit.Assert.*;
 
 public class PaymentServiceTest {
 
-	private static final UUID INVALID_TRANSACTION_UIID 
-							= UUID.fromString("7e8bdb3c-1538-4b3c-a99e-aae3e6df6540");
+	private static final UUID INVALID_TRANSACTION_UIID = UUID.fromString("7e8bdb3c-1538-4b3c-a99e-aae3e6df6540");
 
 	private PaymentService paymentService;
 
@@ -47,11 +46,10 @@ public class PaymentServiceTest {
 	}
 
 	@Test
-	public void viewTxnReturnsAssociatedExecuteData() 
-							throws TxnNotFoundException {
+	public void viewTxnReturnsAssociatedExecuteData() throws TxnNotFoundException {
 		UUID txnId = paymentService.execute(payer, payee, 4.5d);
-
 		Transaction transaction = paymentService.view(txnId);
+		
 		assertThat(transaction.getAmount(), is(4.5d));
 	}
 
@@ -61,25 +59,23 @@ public class PaymentServiceTest {
 	}
 
 	@Test
-	public void validRefundReturnsNewTxn()
-			throws TxnNotFoundException, RefundExceedsExecuteValueException {
+	public void validRefundReturnsNewTxn() throws TxnNotFoundException, RefundExceedsExecuteValueException {
 		UUID txnId = paymentService.execute(payer, payee, 4.5d);
-
 		UUID refundTxnId = paymentService.refund(txnId, -2.5d);
+		
 		assertThat(refundTxnId, is(notNullValue()));
 	}
 
 	@Test(expected = TxnNotFoundException.class)
-	public void invalidRefundThrowsTxnNotFound()
-			throws TxnNotFoundException, RefundExceedsExecuteValueException {
+	public void invalidRefundThrowsTxnNotFound() throws TxnNotFoundException, RefundExceedsExecuteValueException {
 		paymentService.refund(INVALID_TRANSACTION_UIID, -3.5d);
 	}
 
 	@Test
 	public void validPositiveRefundReturnsCorrectTxn() throws TxnNotFoundException, RefundExceedsExecuteValueException {
 		UUID txnId = paymentService.execute(payer, payee, 4.5d);
-
 		UUID refundTxnId = paymentService.refund(txnId, 2.5d);
+		
 		assertThat(refundTxnId, is(notNullValue()));
 		assertTrue(paymentService.view(refundTxnId).getAmount() == -2.5d);
 	}
@@ -87,16 +83,16 @@ public class PaymentServiceTest {
 	@Test(expected = RefundExceedsExecuteValueException.class)
 	public void invalidRefundThrowsREEVE() throws TxnNotFoundException, RefundExceedsExecuteValueException {
 		UUID txnId = paymentService.execute(payer, payee, 4.5d);
-
 		Transaction transaction = paymentService.view(txnId);
+		
 		paymentService.refund(transaction.getId(), -6.5d);
 	}
 
 	@Test(expected = RefundExceedsExecuteValueException.class)
 	public void zeroRefundThrowsREEVE() throws TxnNotFoundException, RefundExceedsExecuteValueException {
 		UUID txnId = paymentService.execute(payer, payee, 4.5d);
-
 		Transaction transaction = paymentService.view(txnId);
+		
 		paymentService.refund(transaction.getId(), 0d);
 	}
 
@@ -104,33 +100,33 @@ public class PaymentServiceTest {
 	public void cumulativeTxnValueIncRefundsIsCorrect()
 			throws TxnNotFoundException, RefundExceedsExecuteValueException {
 		UUID txnId = paymentService.execute(payer, payee, 4.5d);
-		UUID refundTxnId = paymentService.refund(txnId, -2.5d);
-		UUID txnId2 = paymentService.execute(payer, payee, 6.0d);
+		paymentService.refund(txnId, -2.5d);
+		paymentService.execute(payer, payee, 6.0d);
 
 		assertThat(paymentService.getCumulativeTxnValue(), is(8.0d));
 	}
-	
+
 	@Test
-	public void noCumulativeTxn()
-			throws TxnNotFoundException, RefundExceedsExecuteValueException {
+	public void noCumulativeTxn() throws TxnNotFoundException, RefundExceedsExecuteValueException {
 		assertThat(paymentService.getCumulativeTxnValue(), is(0d));
 	}
 
 	@Test
 	public void cumulativePayersIsCorrect() throws TxnNotFoundException, RefundExceedsExecuteValueException {
 		UUID txnId = paymentService.execute(payer, payee, 4.5d);
-		UUID refundTxnId = paymentService.refund(txnId, -2.5d);
-		UUID txnId2 = paymentService.execute(payer, payee, 6.0d);
+		paymentService.refund(txnId, -2.5d);
+		paymentService.execute(payer, payee, 6.0d);
 
 		List<String> names = Arrays.asList("benji", "benji");
 
 		assertThat(paymentService.getCumulativePayerNames(), is(names));
 	}
-	
+
 	@Test
 	public void noCumulativePayers() throws TxnNotFoundException, RefundExceedsExecuteValueException {
-		UUID txnId = paymentService.execute(payer, payee, 4.5d);
-		UUID txnId2 = paymentService.execute(payee, payer, 6.0d);
+		paymentService.execute(payer, payee, 4.5d);
+		paymentService.execute(payee, payer, 6.0d);
+		
 		assertTrue(paymentService.getCumulativePayerNames().isEmpty());
 	}
 }

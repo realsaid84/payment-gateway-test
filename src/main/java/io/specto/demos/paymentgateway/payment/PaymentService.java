@@ -1,7 +1,6 @@
 package io.specto.demos.paymentgateway.payment;
 
 import io.specto.demos.paymentgateway.account.Account;
-import io.specto.demos.paymentgateway.account.InvalidRefundValueException;
 import io.specto.demos.paymentgateway.account.RefundExceedsExecuteValueException;
 import io.specto.demos.paymentgateway.account.Transaction;
 import io.specto.demos.paymentgateway.account.TxnNotFoundException;
